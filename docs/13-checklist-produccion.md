@@ -1,58 +1,53 @@
 # 13 — Checklist de producción
 
-Antes de mostrar tu app al mundo (o al profe), repasa esta lista. Cada punto
-es un fallo real que ha dejado apps fuera de servicio.
+Antes de exponer la app, revisar esta lista. Cada punto es un fallo real que
+ha dejado apps fuera de servicio.
 
 ## Secretos
 
-- [ ] `.env` **no** está en Git (`git status` limpio y `.gitignore` con `.env`).
-- [ ] `SECRET_KEY` es aleatorio y largo (no `dev-secret`, no el de ejemplo).
-- [ ] `DEBUG=0` en el VPS (con `DEBUG=1` Flask muestra trazas con variables
-      secretas a cualquiera).
-- [ ] Las credenciales de correo/base de datos del `.env` son de producción y
-      no están en ningún commit viejo (si lo estuvieron: **rotalas**).
+- [ ] `.env` no está en Git (`git status` limpio, `.gitignore` con `.env`).
+- [ ] `SECRET_KEY` aleatorio y largo, no el de ejemplo.
+- [ ] `DEBUG=0` en el VPS. Con `DEBUG=1`, Flask muestra trazas con variables
+      secretas a cualquiera.
+- [ ] Credenciales de correo y base de datos del `.env` son de producción y
+      no están en commits viejos. Si lo estuvieron, rotarlas.
 
-## Django / Flask en producción
+## App en producción
 
-- [ ] La app corre con **gunicorn** (u otro WSGI), nunca con el `runserver` de
-      desarrollo.
-- [ ] `ALLOWED_HOSTS` y `CORS_ORIGINS` listan solo tus dominios reales.
-- [ ] Si usas HTTPS (sí lo usas), activa `SESSION_COOKIE_SECURE`,
-      `CSRF_COOKIE_SECURE` y, detrás de Caddy,
-      `USE_X_FORWARDED_PROTO=True`.
+- [ ] Corre con gunicorn, nunca con el `runserver` de desarrollo.
+- [ ] `ALLOWED_HOSTS` y `CORS_ORIGINS` con los dominios reales.
+- [ ] Detrás de Caddy: `USE_X_FORWARDED_PROTO=True`,
+      `SESSION_COOKIE_SECURE=True`, `CSRF_COOKIE_SECURE=True`.
 
 ## Servidor
 
-- [ ] Firewall: solo 22/80/443 abiertos (`sudo ss -tlnp` no muestra sorpresas).
-- [ ] SSH: solo con llaves (en `/etc/ssh/sshd_config`,
-      `PasswordAuthentication no`) — opcional pero recomendado.
-- [ ] `docker compose ps` sin contenedores en estado `Restarting`.
+- [ ] Firewall: solo 22, 80 y 443 (`sudo ss -tlnp` sin sorpresas).
+- [ ] SSH solo con llaves: en `/etc/ssh/sshd_config`,
+      `PasswordAuthentication no`.
+- [ ] `docker compose ps` sin contenedores en `Restarting`.
 - [ ] Logs revisados: `docker compose logs --tail=50 app`.
 
 ## Datos
 
-- [ ] Los datos viven en **volúmenes** (`../data`, `db_data`...), no dentro del
-      contenedor (si no, el próximo `build` los borra).
-- [ ] Backup automatizado de la base de datos. Ejemplo con cron en el VPS:
+- [ ] Los datos viven en volúmenes (`../data`, `db_data`), no dentro del
+      contenedor. Si no, el próximo build los borra.
+- [ ] Backup automatizado. Ejemplo con cron en el VPS:
       ```bash
       (crontab -l 2>/dev/null; echo "0 3 * * * docker compose -f $HOME/mi-app/docker/docker-compose.yml exec -T db pg_dump -U miapp miapp | gzip > $HOME/backups/db_$(date +\%F).sql.gz") | crontab -
       ```
-- [ ] Prueba de restauración hecha al menos una vez (un backup que nunca se
-      restauró es un salto de fe).
+- [ ] Restauración probada al menos una vez. Un backup que nunca se restauró
+      es un salto de fe.
 
-## Vida
+## Continuidad
 
-- [ ] "Latido" cada 15 min contra `/api/health` (anti-idle de Oracle,
-      capítulo 02).
-- [ ] Cron de DuckDNS actualizando la IP (capítulo 06).
+- [ ] Latido cada 15 min contra `/api/health` (anti-idle de Oracle).
+- [ ] Cron de DuckDNS actualizando la IP.
 - [ ] El deploy pasa las pruebas antes de tocar el VPS (`needs: pruebas`).
 
-> ✅ **Así quedó en PlomApp:** sus secretos viven en `.env` (ignorado por Git),
-> la app corre con gunicorn detrás de Caddy con cabeceras de seguridad
-> (`nosniff`, `Referrer-Policy`, bloqueo de `/.env` y `/.git`), usan
-> `transaction.atomic` contra doble agendamiento, y las respuestas de error
-> son JSON sin trazas. En el VPS de PlomApp también hay un
-> `Caddyfile.hardening-*.bak`: cada endurecimiento queda respaldado antes de
-> tocar la config viva.
+> En PlomApp: secretos en `.env` ignorado por Git, gunicorn detrás de Caddy
+> con cabeceras de seguridad (`nosniff`, `Referrer-Policy`, bloqueo de
+> `/.env` y `/.git`), `transaction.atomic` contra doble agendamiento, errores
+> JSON sin trazas. En el servidor hay un `Caddyfile.hardening-*.bak`: cada
+> endurecimiento queda respaldado antes de tocar la config viva.
 
-**Siguiente:** [14 — Alternativa sin Docker (apéndice)](14-sin-docker.md)
+**Siguiente:** [14 — Sin Docker (apéndice)](14-sin-docker.md)

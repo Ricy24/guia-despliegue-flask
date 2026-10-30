@@ -1,72 +1,61 @@
-# 04 — Conexión SSH y firewall del servidor
+# 04 — SSH y firewall del servidor
 
-Ya entraste a tu VPS una vez (capítulo 03). Ahora lo dejamos listo: alias de
-conexión cómodo, firewall del servidor abierto en los puertos correctos, y
-actualizaciones básicas.
+La máquina ya deja conectar. Ahora se deja el servidor listo: alias de
+conexión, firewall abierto en los puertos correctos y actualizaciones.
 
-## Conectarte sin escribir todo cada vez
+## Conectar sin escribir todo
 
-> 🎯 **Tu turno** — crea (o edita) el archivo `~\.ssh\config` en Windows:
-> ```powershell
-> notepad ~\.ssh\config
-> ```
-> Pega y ajusta:
-> ```
-> Host vps
->     HostName <TU_IP>
->     User ubuntu
->     IdentityFile ~/.ssh/mi-app-vps.pub
-> ```
-> Ahora conectarte será solo:
-> ```powershell
-> ssh vps
-> ```
+Crear (o editar) `~\.ssh\config` en la computadora local:
+
+```powershell
+notepad ~\.ssh\config
+```
+
+```
+Host vps
+    HostName <TU_IP>
+    User ubuntu
+    IdentityFile ~/.ssh/mi-app-vps.pub
+```
+
+De ahí en adelante la conexión es `ssh vps`.
 
 ## Actualizar el sistema
 
-Lo primero en cualquier servidor nuevo (puede tardar unos minutos):
+Dentro del VPS:
 
-> 🎯 **Tu turno** — dentro del VPS:
-> ```bash
-> sudo apt update && sudo apt upgrade -y
-> ```
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 
-## El firewall: DOS capas (¡la confusión #1!)
+## El firewall: dos capas
 
-Hay dos firewalls distintos y los dos deben dejar pasar el tráfico:
+Hay dos firewalls y los dos tienen que dejar pasar el tráfico:
 
-1. **Security List de Oracle** — ya lo abrimos en el capítulo 03 (en la nube).
-2. **Firewall del propio Ubuntu** — reglas del sistema operativo.
+1. **Security List de Oracle** — la que se abrió en el capítulo 03, en la
+   nube.
+2. **Firewall del Ubuntu** — iptables del sistema operativo.
 
-Oracle viene con `iptables` activo y, además, su **Oracle Cloud Agent**
-gestiona cosas del sistema. El script de la plantilla hace ambas cosas por ti:
+Oracle viene con iptables activo. El script de la plantilla hace las dos
+cosas: abre 22, 80 y 443, guarda las reglas para que sobrevivan reinicios,
+instala Docker y git, y crea la carpeta de la app.
 
-> 🎯 **Tu turno** — sube el script de la plantilla y ejecútalo. En local
-> (PowerShell, desde la carpeta de esta guía):
-> ```powershell
-> scp .\plantilla\scripts\setup_vps.sh vps:~
-> ```
-> Y en el VPS:
-> ```bash
-> bash setup_vps.sh
-> ```
-> El script:
-> 1. Abre los puertos 22, 80 y 443 en iptables.
-> 2. Guarda las reglas para que sobrevivan reinicios (`netfilter-persistent`).
-> 3. Instala Docker (capítulo siguiente) y git.
-> 4. Crea la carpeta `~/mi-app` de tu app.
+Desde la computadora local, subir el script:
 
-> ✅ **Así quedó en PlomApp:** el servidor `lifeos` corre `iptables` y los
-> puertos 22/80/443 están abiertos en ambas capas; el 80 y 443 los consume
-> el contenedor Caddy (que veremos en el capítulo 07) y el 22 el SSH.
+```powershell
+scp .\plantilla\scripts\setup_vps.sh vps:~
+```
 
-> ⚠️ **Si te atascas:**
-> - **`sudo` pide contraseña y no hay**: no pasa nada, el usuario `ubuntu`
->   tiene `sudo` sin contraseña en Oracle (por eso aparece el archivo
->   `.sudo_as_admin_successful`).
-> - **Se desconecta al instalar**: raro; revisa `df -h` (disco lleno) y
->   `free -h` (RAM), y reintenta solo `apt upgrade`.
-> - **Quieres verificar qué está escuchando**: `sudo ss -tlnp` muestra todos
->   los puertos abiertos y qué proceso los usa.
+Y en el VPS:
+
+```bash
+bash setup_vps.sh
+```
+
+> El usuario `ubuntu` tiene `sudo` sin contraseña en Oracle (por eso existe el
+> archivo `.sudo_as_admin_successful`).
+
+> Para ver qué puertos están abiertos y qué proceso los usa:
+> `sudo ss -tlnp`.
 
 **Siguiente:** [05 — Docker en el servidor](05-docker-en-el-vps.md)

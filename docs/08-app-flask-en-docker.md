@@ -1,106 +1,109 @@
-# 08 — Empaquetar tu app Flask en Docker
+# 08 — Tu Flask en Docker
 
-Llegó el momento: tu Flask + gunicorn dentro de un contenedor, detrás de
-Caddy, con tus secretos en un `.env`. Usaremos la app de ejemplo
-([`ejemplo/`](../ejemplo/app.py)) para probar, pero los mismos pasos aplican
-a tu proyecto real.
+La app Flask dentro de un contenedor, detrás de Caddy, con los secretos en un
+`.env`. Los pasos son iguales para la app de ejemplo
+([`ejemplo/`](../ejemplo/app.py)) y para un proyecto real.
 
-## Probar la app en local (opcional pero recomendado)
+## Probar en local (recomendado)
 
-> 🎯 **Tu turno** — en tu computadora:
-> ```powershell
-> cd ejemplo
-> python -m venv venv
-> .\venv\Scripts\Activate.ps1
-> pip install -r requirements.txt pytest
-> python app.py        # en otra terminal:  curl http://localhost:8000/api/health
-> pytest -q            # las pruebas deben pasar
-> ```
+```powershell
+cd ejemplo
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt pytest
+python app.py        # en otra terminal: curl http://localhost:8000/api/health
+pytest -q
+```
 
-## Los 3 archivos que hacen la magia
-
-En tu proyecto crea estas carpetas (ajusta los `# AJUSTA`):
+## Los tres archivos
 
 1. **`docker/Dockerfile`** → [`plantilla/docker/Dockerfile`](../plantilla/docker/Dockerfile)
-   La receta de la imagen: base Python, instala `requirements.txt` + gunicorn,
-   copia el código y arranca gunicorn en el puerto 8000.
+   Receta de la imagen: base Python 3.12, instala `requirements.txt` y
+   gunicorn, copia el código, arranca gunicorn en el puerto 8000.
 2. **`docker/docker-compose.yml`** → [`plantilla/docker/docker-compose.yml`](../plantilla/docker/docker-compose.yml)
-   Define los servicios: `caddy` (el del capítulo 07) y `app` (tu Flask).
+   Los servicios: `caddy` (del capítulo 07) y `app` (el Flask).
 3. **`.env.ejemplo`** → [`plantilla/.env.ejemplo`](../plantilla/.env.ejemplo)
-   Las variables que tu app leerá en producción.
+   Variables que la app lee en producción.
 
-> 🎯 **Tu turno — la lista de ajustes (los 5 lugares):**
-> 1. `Dockerfile`: la línea `CMD` → el archivo y variable de tu app
->    (`app:app`, `run:application`, `wsgi:app`...).
-> 2. `docker-compose.yml`: `name:`, `container_name:` de caddy y app.
-> 3. `Caddyfile`: tu dominio y el servicio (`app:8000`).
-> 4. `requirements.txt`: que incluya todo lo que tu app importa.
-> 5. `.gitignore`: que contenga `.env`, `venv/`, `__pycache__/` y `data/`.
->    **Subir un `.env` a Git es el error más caro de todos.**
+### Los 5 lugares que hay que ajustar
 
-## Subir el código al servidor y arrancar
+1. `Dockerfile`, línea `CMD`: el módulo y variable de la app. `app:app`
+   significa `app.py` con objeto Flask `app`. Si el entrypoint es `run.py` con
+   `application`, queda `gunicorn ... run:application`.
+2. `docker-compose.yml`: `name:`, y los `container_name:` de caddy y app.
+3. `Caddyfile`: el dominio y el servicio (`app:8000`).
+4. `requirements.txt`: que incluya todo lo que la app importa.
+5. `.gitignore`: con `.env`, `venv/`, `__pycache__/` y `data/`. Subir un
+   `.env` a Git es el error más caro posible.
 
-> 🎯 **Tu turno** — forma rápida con `scp` (en local):
-> ```powershell
-> scp -r .\docker .\server .\requirements.txt .\app.py vps:mi-app/
-> ```
-> (para tu proyecto real, mejor sube TODO el repo por git, que es como lo
-> haremos de forma automática en el capítulo 10).
+## Subir el código y arrancar
+
+Forma rápida desde la máquina local:
+
+```powershell
+scp -r .\docker .\server .\requirements.txt .\app.py vps:mi-app/
+```
+
+Para un proyecto real lo mejor es subir todo el repo por git, que es
+justamente lo que automatiza el capítulo 10.
 
 En el VPS:
 
-> 🎯 **Tu turno** — crea el `.env` real y levanta todo:
-> ```bash
-> cd ~/mi-app
-> cp .env.ejemplo .env
-> nano .env            # ajusta valores; genera SECRET_KEY:
-> # python3 -c "import secrets; print(secrets.token_hex(32))"
-> docker compose up -d --build
-> docker compose ps    # app: Up (health si lo configuraste)
-> docker compose logs -f app
-> ```
+```bash
+cd ~/mi-app
+cp .env.ejemplo .env
+nano .env            # llenar valores. SECRET_KEY con:
+# python3 -c "import secrets; print(secrets.token_hex(32))"
+docker compose up -d --build
+docker compose ps
+docker compose logs -f app
+```
 
-> 🎯 **Tu turno** — la prueba final del capítulo:
-> ```bash
-> curl https://mi-app.duckdns.org/api/health
-> # {"app":"ejemplo-guia","status":"ok"}
->
-> curl -X POST https://mi-app.duckdns.org/api/saludo -H "Content-Type: application/json" -d '{"nombre":"SENA"}'
-> # {"mensaje":"¡Hola, SENA!"}
-> ```
-> Y el candado 🔒 en el navegador. **¡Tu app está en internet!**
+## Probar
 
-> ✅ **Así quedó en PlomApp:** el servidor contiene `~/plomaap` con
-> `Dockerfile` (python:3.12-slim + gunicorn con 3 workers), `docker-compose.yml`
-> (servicios `api` y `db` con pgvector, healthcheck y volúmenes de datos) y un
-> `.env` con los secretos reales (que jamás se subió a Git). La red externa
-> `lifeos_lifeos_net` conecta su app con el Caddy del otro stack — cuando
-> tengas varias apps, ese es el patrón a seguir.
+```bash
+curl https://mi-app.duckdns.org/api/health
+# {"app":"ejemplo-guia","status":"ok"}
 
-## Si tu app usa MySQL o PostgreSQL
+curl -X POST https://mi-app.duckdns.org/api/saludo -H "Content-Type: application/json" -d '{"nombre":"SENA"}'
+# {"mensaje":"¡Hola, SENA!"}
+```
 
-En el `docker-compose` de la plantilla hay un bloque comentado con el servicio
-`db`. Descomentarlo, ajustar credenciales en `.env`, y en el servicio `app`
-agregar `depends_on: [db]`. Ejemplo real de PlomApp: `pgvector/pgvector:pg17`
-con healthcheck y volumen nombrado `plomaap_pgdata`.
+El navegador con el candado en `https://mi-app.duckdns.org`. La app ya está
+publicada.
 
-Para Flask + Flask-Migrate, las migraciones se ejecutan así en cada deploy
-(lo automatizaremos en el capítulo 10):
+> En PlomApp, el servidor tiene `~/plomaap` con el Dockerfile
+> (python:3.12-slim + gunicorn con 3 workers), el docker-compose (servicios
+> `api` y `db` con pgvector, healthcheck y volúmenes) y un `.env` con los
+> secretos reales que nunca se subió a Git. La red externa `lifeos_lifeos_net`
+> conecta su app con el Caddy del otro stack: ese es el patrón cuando hay
+> varias apps en el mismo servidor.
+
+## Si la app usa MySQL o PostgreSQL
+
+En el compose de la plantilla hay un bloque comentado con el servicio `db`.
+Se descomenta, se ajustan las credenciales en `.env` y al servicio `app` se le
+agrega `depends_on: [db]`. En PlomApp es `pgvector/pgvector:pg17` con
+healthcheck y volumen nombrado `plomaap_pgdata`.
+
+Con Flask-Migrate, las migraciones se ejecutan en cada deploy (lo siguiente en
+automatizar):
 
 ```bash
 docker compose exec app flask db upgrade
 ```
 
-> ⚠️ **Si te atascas:**
-> - **`build` falla con "requirements.txt: no such file"**: el `context:` del
->   compose apunta a la raíz del proyecto; revisa que `requirements.txt`
->   esté ahí.
-> - **La app muere al arrancar (`exited (1)`)**: `docker compose logs app`
->   muestra el error real de Python (import faltante, variable mal escrita...).
-> - **502 desde el navegador pero `docker compose ps` dice Up**: el Caddy y
->   la app no están en la misma red o el puerto del `reverse_proxy` no
->   coincide con el de gunicorn. Deben decir ambos `8000`.
-> - **"Address already in use" en 443/80**: otro proceso (u otro Caddy) ya
->   usa ese puerto: `sudo ss -tlnp | grep -E ':(80|443)'`.
+## Errores comunes
 
-**Siguiente:** [09 — Pruebas automáticas con GitHub Actions](09-tests-github-actions.md)
+- **El build falla con "requirements.txt: no such file"**: el `context:` del
+  compose apunta a la raíz del proyecto; verificar que `requirements.txt`
+  esté ahí.
+- **El contenedor de la app muere (`Exited (1)`)**: `docker compose logs app`
+  muestra el error real de Python.
+- **502 desde el navegador y `docker compose ps` en Up**: el Caddy y la app
+  no están en la misma red, o el puerto del `reverse_proxy` no coincide con
+  el de gunicorn. Los dos deben decir 8000.
+- **"Address already in use" en 80/443**: algo más usa ese puerto:
+  `sudo ss -tlnp | grep -E ':(80|443)'`.
+
+**Siguiente:** [09 — Pruebas automáticas](09-tests-github-actions.md)

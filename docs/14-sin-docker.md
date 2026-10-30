@@ -1,79 +1,80 @@
-# 14 — Alternativa sin Docker (apéndice)
+# 14 — Sin Docker (apéndice)
 
-¿Quieres entender qué hace Docker "por dentro"? Aquí la misma app Flask
-corriendo **directamente en el servidor**, con gunicorn como servicio de
-systemd y Caddy instalado con apt. Es más conceptos de Linux, pero te deja el
-control fino.
+La misma app Flask corriendo directamente en el servidor: gunicorn como
+servicio de systemd y Caddy instalado con apt. Más conceptos de Linux, pero
+más control. No es obligatorio: el camino principal es Docker (capítulos
+01-13). Este apéndice sirve para entender qué hace Docker por dentro, o para
+un VPS que no pueda correr Docker.
 
-> 💡 No es obligatorio: el camino principal (01-13) es Docker y es el que
-> recomiendo para la clase. Este apéndice es para curiosos o para cuando el
-> VPS no puede correr Docker.
+## 1. Python y usuario de la app
 
-## Paso 1 — Python y usuario de la app
+En el VPS:
 
-> 🎯 **Tu turno** — en el VPS:
-> ```bash
-> sudo apt update
-> sudo apt install -y python3 python3-venv python3-pip caddy
-> sudo useradd -m -s /bin/bash appuser
-> sudo -u appuser bash -c 'git clone https://github.com/<TU_USUARIO>/<TU_REPO>.git ~/mi-app'
-> sudo -u appuser bash -c 'cd ~/mi-app && python3 -m venv venv && ./venv/bin/pip install -r requirements.txt gunicorn'
-> ```
+```bash
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip caddy
+sudo useradd -m -s /bin/bash appuser
+sudo -u appuser bash -c 'git clone https://github.com/<TU_USUARIO>/<TU_REPO>.git ~/mi-app'
+sudo -u appuser bash -c 'cd ~/mi-app && python3 -m venv venv && ./venv/bin/pip install -r requirements.txt gunicorn'
+```
 
-## Paso 2 — Servicio systemd de gunicorn
+## 2. Servicio systemd de gunicorn
 
-> 🎯 **Tu turno** — crea `/etc/systemd/system/mi-app.service`:
-> ```bash
-> sudo nano /etc/systemd/system/mi-app.service
-> ```
-> ```ini
-> [Unit]
-> Description=App Flask (gunicorn)
-> After=network.target
->
-> [Service]
-> User=appuser
-> Group=www-data
-> WorkingDirectory=/home/appuser/mi-app
-> Environment="PATH=/home/appuser/mi-app/venv/bin"
-> ExecStart=/home/appuser/mi-app/venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 3 app:app
-> Restart=always
->
-> [Install]
-> WantedBy=multi-user.target
-> ```
-> ```bash
-> sudo systemctl daemon-reload
-> sudo systemctl enable --now mi-app
-> sudo systemctl status mi-app      # debe decir "active (running)"
-> ```
-> Nota: gunicorn escucha solo en `127.0.0.1:8000`: **no necesita** estar
-> expuesto a internet; Caddy (en el mismo servidor) le pasa las peticiones.
+Crear `/etc/systemd/system/mi-app.service`:
 
-## Paso 3 — Caddy del sistema
+```bash
+sudo nano /etc/systemd/system/mi-app.service
+```
 
-> 🎯 **Tu turno** — edita `/etc/caddy/Caddyfile` con el MISMO contenido que
-> el capítulo 07, pero con `reverse_proxy localhost:8000`:
-> ```bash
-> sudo nano /etc/caddy/Caddyfile
-> sudo systemctl reload caddy
-> ```
+```ini
+[Unit]
+Description=App Flask (gunicorn)
+After=network.target
 
-HTTPS automático funciona igual: Caddy pide el certificado solo.
+[Service]
+User=appuser
+Group=www-data
+WorkingDirectory=/home/appuser/mi-app
+Environment="PATH=/home/appuser/mi-app/venv/bin"
+ExecStart=/home/appuser/mi-app/venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 3 app:app
+Restart=always
 
-## Diferencias frente a Docker
+[Install]
+WantedBy=multi-user.target
+```
 
-| Tema | Con Docker | Sin Docker (esto) |
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now mi-app
+sudo systemctl status mi-app      # debe decir "active (running)"
+```
+
+Gunicorn escucha solo en `127.0.0.1:8000`: no necesita estar expuesto a
+internet, Caddy (en el mismo servidor) le pasa las peticiones.
+
+## 3. Caddy del sistema
+
+Editar `/etc/caddy/Caddyfile` con el mismo contenido del capítulo 07, pero
+con `reverse_proxy localhost:8000`:
+
+```bash
+sudo nano /etc/caddy/Caddyfile
+sudo systemctl reload caddy
+```
+
+HTTPS automático funciona igual.
+
+## Diferencias con Docker
+
+| Tema | Con Docker | Sin Docker |
 |---|---|---|
 | Actualizar | `git pull` + `docker compose up -d --build` | `git pull` + `pip install -r requirements.txt` + `systemctl restart mi-app` |
-| Aislamiento | Cada app en su caja | Todo comparte el mismo Python del sistema |
-| Varias versiones de Python/librerías | Fácil | Complicado |
-| Desastre y reconstrucción | `docker compose up` en otra máquina | Reconstruir todo a mano |
+| Aislamiento | Cada app en su caja | Todo comparte el Python del sistema |
+| Varias versiones de Python o librerías | Fácil | Complicado |
+| Reconstruir en otra máquina | `docker compose up` | Reconstruir todo a mano |
 
-> ✅ **Así quedó en PlomApp:** su servidor usa el camino Docker, pero su
-> `lifeos` tiene documentado (en `DEPLOYMENT.md`) el topología equivalente:
-> reverse proxy → app → base + caché. Los servicios de systemd solo los usan
-> los agentes del sistema de Oracle.
+> En PlomApp el servidor usa Docker, y su `DEPLOYMENT.md` documenta el
+> topología equivalente: reverse proxy → app → base + caché.
 
-**Volver al índice:** [README](../README.md) · ¿Algo falló?
-→ [Troubleshooting](troubleshooting.md)
+**Volver al índice:** [README](../README.md). Si algo falla:
+[Troubleshooting](troubleshooting.md).
