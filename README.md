@@ -1,5 +1,32 @@
 # Guía de despliegue Flask — Oracle Always Free + Docker + Caddy + CI/CD
 
+> **Documentación publicada:** <https://ricy24.github.io/guia-despliegue-flask/>
+
+Mapa mental de todo el recorrido (GitHub lo dibuja solo, es Mermaid):
+
+```mermaid
+mindmap
+  root((Guía de despliegue Flask))
+    Base
+      01 Cuentas gratis
+      02 Cuenta de Oracle
+      03 Red e instancia
+      04 SSH y firewall
+    Servidor
+      05 Docker
+      06 DuckDNS
+      07 Caddy y HTTPS
+      08 Flask en Docker
+    Automatización
+      09 Pruebas CI
+      10 Despliegue CD
+    Extras
+      11 Vercel
+      12 Cloudflare
+      13 Checklist
+      14 Sin Docker
+```
+
 Guía para desplegar una app Flask en un VPS gratis de Oracle Cloud, con
 HTTPS automático, pruebas automáticas y despliegue automático con GitHub
 Actions. Al terminar queda:

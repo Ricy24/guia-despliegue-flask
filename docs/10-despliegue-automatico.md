@@ -3,6 +3,17 @@
 El flujo: pruebas verdes en `main` → GitHub se conecta por SSH al VPS →
 `git pull` → reconstruye el contenedor → queda publicado.
 
+```mermaid
+flowchart TD
+    P[git push a main] --> T[Job pruebas<br/>pytest en el runner]
+    T -->|pasa| D[Job despliegue<br/>appleboy/ssh-action]
+    T -->|falla| F[No se despliega nada]
+    D -->|"SSH con el secret VPS_SSH_KEY"| V[VPS: git pull]
+    V --> B[docker compose build]
+    B --> U2[docker compose up -d]
+    U2 --> W[https://mi-app.duckdns.org actualizada]
+```
+
 ## Seguridad: la llave y los secretos
 
 Nadie escribe IPs ni llaves en el código. El flujo es:

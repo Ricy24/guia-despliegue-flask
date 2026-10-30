@@ -17,7 +17,14 @@ Verificar desde la máquina local:
 nslookup mi-app.duckdns.org
 ```
 
-Debe devolver la IP del VPS.
+Debe devolver la IP del VPS. El recorrido completo de una petición:
+
+```mermaid
+flowchart LR
+    N["Navegador (mi-app.duckdns.org)"] -->|"¿qué IP tiene ese nombre?"| D[DuckDNS]
+    D -->|responde la IP| N
+    N -->|conexión a la IP del VPS| V[VPS Oracle]
+```
 
 ## Mantener la IP actualizada
 

@@ -7,6 +7,15 @@ configuración, pide el certificado a Let's Encrypt y lo renueva antes de
 caducar. Además es reverse proxy: recibe en 80/443 y le pasa las peticiones a
 la app internamente.
 
+```mermaid
+flowchart LR
+    U[Usuario] -->|"1. petición HTTPS"| C[Caddy :443]
+    C -->|"2. se la pasa a la app"| A[Flask :8000]
+    A -->|respuesta| C
+    C -->|respuesta cifrada| U
+    LE[Let's Encrypt] -.->|"certificado y renovación automática"| C
+```
+
 ## El Caddyfile
 
 Crear la carpeta `server` en el proyecto y guardar ahí el `Caddyfile` de la

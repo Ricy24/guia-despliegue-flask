@@ -4,6 +4,16 @@ CI (Integración Continua) es que en cada push o Pull Request, un robot de
 GitHub corra las pruebas en una máquina gratis y marque el resultado. Si
 alguien rompe algo, se entera antes de mezclar, no en la demo.
 
+```mermaid
+flowchart TD
+    P[Push o Pull Request] --> R["Runner gratis de GitHub (ubuntu-latest)"]
+    R --> S1[1. baja el código]
+    S1 --> S2[2. instala Python y dependencias]
+    S2 --> S3[3. corre pytest -q]
+    S3 -->|pasa| M[Merge permitido]
+    S3 -->|falla| X[El PR no se mezcla hasta arreglarlo]
+```
+
 ## 1. Pruebas locales primero
 
 Un workflow corriendo pruebas rotas no sirve. Copiar la prueba de humo al

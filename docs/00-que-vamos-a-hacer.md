@@ -21,26 +21,13 @@ GitHub Actions y Vercel. Costo: $0/mes.
 
 ## Arquitectura final
 
-```
-      El usuario
-          │
-          │  https://mi-app.duckdns.org
-          ▼
-   ┌──────────────┐      DuckDNS: "mi-app.duckdns.org"
-   │   DuckDNS    │      = la IP del VPS
-   └──────┬───────┘
-          │
-          ▼
-   ┌──────────────┐  puertos 80/443 (abiertos en Oracle)
-   │ VPS Oracle  │
-   │  ┌────────┐ │
-   │  │ Caddy  │ │  ← obtiene el certificado HTTPS solo
-   │  └───┬────┘ │
-   │      │ red interna de Docker
-   │  ┌───▼────┐ │
-   │  │  app   │ │  ← Flask + gunicorn en el puerto 8000
-   │  └────────┘ │
-   └──────────────┘
+```mermaid
+flowchart TD
+    U[Usuario] -->|"https://mi-app.duckdns.org"| D[DuckDNS<br/>nombre → IP del VPS]
+    D --> C
+    subgraph vps["VPS Oracle (solo puertos 80/443 abiertos)"]
+        C[Caddy<br/>HTTPS automático] -->|"red interna de Docker :8000"| A[App Flask<br/>gunicorn]
+    end
 ```
 
 Solo Caddy está expuesto a internet. La app vive en una red interna de Docker
