@@ -55,6 +55,6 @@ completo del error: las palabras clave importan.
 1. `docker compose ps` — ¿está todo `Up`?
 2. `docker compose logs --tail=100 app` — ¿qué dice la app?
 3. `curl -v https://<TU_DOMINIO>/api/health` — ¿dónde se corta?
-4. Reproducir el problema con la app de ejemplo ([`../ejemplo/`](../ejemplo/)):
+4. Reproducir el problema con la app de ejemplo ([`ejemplo/`](https://github.com/Ricy24/guia-despliegue-flask/tree/main/ejemplo)):
    si el ejemplo funciona y la app propia no, el problema está en el código o
    la configuración, no en el servidor.

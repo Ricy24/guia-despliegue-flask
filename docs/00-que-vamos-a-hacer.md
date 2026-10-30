@@ -38,8 +38,8 @@ Cloudflare delante.
 ## Cómo usar la guía
 
 - Los capítulos van en orden del 01 al 13. Cada uno continúa el anterior.
-- Los archivos que se copian al proyecto están en [`plantilla/`](../plantilla/LEEME.md),
-  y la app mínima con la que se prueban los pasos está en [`ejemplo/`](../ejemplo/).
+- Los archivos que se copian al proyecto están en [`plantilla/`](https://github.com/Ricy24/guia-despliegue-flask/blob/main/plantilla/LEEME.md),
+  y la app mínima con la que se prueban los pasos está en [`ejemplo/`](https://github.com/Ricy24/guia-despliegue-flask/tree/main/ejemplo).
 - Donde aparezca `<TU_IP>` o `mi-app.duckdns.org` se reemplaza con los valores
   propios.
 

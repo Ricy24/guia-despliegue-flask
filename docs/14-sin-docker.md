@@ -76,5 +76,5 @@ HTTPS automático funciona igual.
 > En PlomApp el servidor usa Docker, y su `DEPLOYMENT.md` documenta el
 > topología equivalente: reverse proxy → app → base + caché.
 
-**Volver al índice:** [README](../README.md). Si algo falla:
+**Volver al índice:** [README](https://github.com/Ricy24/guia-despliegue-flask#readme). Si algo falla:
 [Troubleshooting](troubleshooting.md).

@@ -19,7 +19,7 @@ flowchart LR
 ## El Caddyfile
 
 Crear la carpeta `server` en el proyecto y guardar ahí el `Caddyfile` de la
-plantilla ([`plantilla/server/Caddyfile`](../plantilla/server/Caddyfile)),
+plantilla ([`plantilla/server/Caddyfile`](https://github.com/Ricy24/guia-despliegue-flask/blob/main/plantilla/server/Caddyfile)),
 ajustando el dominio en la primera línea:
 
 ```

@@ -2,7 +2,7 @@
 
 La app Flask dentro de un contenedor, detrás de Caddy, con los secretos en un
 `.env`. Los pasos son iguales para la app de ejemplo
-([`ejemplo/`](../ejemplo/app.py)) y para un proyecto real.
+([`ejemplo/`](https://github.com/Ricy24/guia-despliegue-flask/blob/main/ejemplo/app.py)) y para un proyecto real.
 
 ## Probar en local (recomendado)
 
@@ -17,12 +17,12 @@ pytest -q
 
 ## Los tres archivos
 
-1. **`docker/Dockerfile`** → [`plantilla/docker/Dockerfile`](../plantilla/docker/Dockerfile)
+1. **`docker/Dockerfile`** → [`plantilla/docker/Dockerfile`](https://github.com/Ricy24/guia-despliegue-flask/blob/main/plantilla/docker/Dockerfile)
    Receta de la imagen: base Python 3.12, instala `requirements.txt` y
    gunicorn, copia el código, arranca gunicorn en el puerto 8000.
-2. **`docker/docker-compose.yml`** → [`plantilla/docker/docker-compose.yml`](../plantilla/docker/docker-compose.yml)
+2. **`docker/docker-compose.yml`** → [`plantilla/docker/docker-compose.yml`](https://github.com/Ricy24/guia-despliegue-flask/blob/main/plantilla/docker/docker-compose.yml)
    Los servicios: `caddy` (del capítulo 07) y `app` (el Flask).
-3. **`.env.ejemplo`** → [`plantilla/.env.ejemplo`](../plantilla/.env.ejemplo)
+3. **`.env.ejemplo`** → [`plantilla/.env.ejemplo`](https://github.com/Ricy24/guia-despliegue-flask/blob/main/plantilla/.env.ejemplo)
    Variables que la app lee en producción.
 
 ### Los 5 lugares que hay que ajustar
