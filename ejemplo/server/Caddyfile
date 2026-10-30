@@ -1,0 +1,17 @@
+# Caddyfile del ejemplo — ajusta el dominio al tuyo
+mi-app.duckdns.org {
+	encode gzip
+
+	request_body {
+		max_size 10MB
+	}
+
+	@probe path /.env* /.git* *.php
+	respond @probe 404
+
+	reverse_proxy app:8000 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

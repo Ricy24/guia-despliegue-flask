@@ -1,0 +1,45 @@
+# ==============================================================================
+# DESPLIEGUE AUTOMÁTICO (CD)
+# Cuando el push a main pasa las pruebas, GitHub se conecta por SSH al VPS
+# y actualiza la app. Guía completa: docs/10-despliegue-automatico.md
+# ==============================================================================
+name: Despliegue
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # despliegue manual si lo necesitas
+
+concurrency:
+  group: despliegue
+  cancel-in-progress: false # NUNCA cancelar un despliegue a medias
+
+jobs:
+  # 1) Primero las pruebas (reutiliza el workflow tests.yml completo)
+  pruebas:
+    uses: ./.github/workflows/tests.yml
+
+  # 2) Solo si las pruebas pasaron, se despliega
+  despliegue:
+    name: despliegue
+    needs: pruebas # "needs" = solo corro si el job anterior salió bien
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Conectarse al VPS y actualizar la app
+        uses: appleboy/ssh-action@v1
+        with:
+          # Estos valores NO están en el código: viven en los Secrets de GitHub
+          # (Settings -> Secrets and variables -> Actions)
+          host: ${{ secrets.VPS_HOST }} # la IP pública de tu VPS
+          username: ${{ secrets.VPS_USER }} # normalmente: ubuntu
+          key: ${{ secrets.VPS_SSH_KEY }} # la llave privada de despliegue
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e # si un comando falla, se detiene todo
+            cd "$HOME/mi-app" # <-- AJUSTA al nombre de la carpeta de tu app
+            git pull --ff-only
+            docker compose build
+            docker compose up -d
+            docker compose ps

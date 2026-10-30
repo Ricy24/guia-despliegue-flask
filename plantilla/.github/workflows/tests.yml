@@ -1,0 +1,48 @@
+# ==============================================================================
+# PRUEBAS AUTOMÁTICAS (CI)
+# Se ejecuta solo cada vez que alguien hace push o abre un Pull Request.
+# Guía completa: docs/09-tests-github-actions.md
+# ==============================================================================
+name: Pruebas
+
+# ¿Cuándo se ejecuta?
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # permite ejecutarlo a mano desde la pestaña Actions
+
+# El workflow solo LEE el código (no puede escribir ni borrar nada)
+permissions:
+  contents: read
+
+# Si llegan 2 cambios casi juntos, se cancela el anterior (ahorra minutos gratis)
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    name: pruebas
+    runs-on: ubuntu-latest # Ubuntu virtual GRATIS que GitHub nos presta
+    timeout-minutes: 10
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip # guarda las librerías instaladas para la próxima vez
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest # las pruebas necesitan pytest
+
+      - name: Ejecutar pruebas
+        run: pytest -q

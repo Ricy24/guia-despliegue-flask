@@ -1,0 +1,35 @@
+# ==============================================================================
+# CONFIGURACIÓN DE CADDY (el "portero" que recibe a los visitantes)
+# Caddy es un reverse proxy: escucha en los puertos 80/443 y le pasa las
+# peticiones a tu app. Lo mejor: genera y renueva SOLO el certificado HTTPS
+# gratis (Let's Encrypt). No tocas certbot ni rutas de archivos.
+# Guía: docs/07-caddy-https.md
+#
+# Este archivo vive en tu proyecto como: server/Caddyfile
+# El docker-compose lo monta dentro del contenedor Caddy.
+# ==============================================================================
+
+# Tu dominio (el de DuckDNS o el que uses). Caddy obtiene el certificado solo.
+mi-app.duckdns.org {
+	# Comprime las respuestas (menos bytes = más rápido)
+	encode gzip
+
+	# Límite del cuerpo de las peticiones: 10 MB.
+	# Si alguien intenta subir un archivo gigante, lo corta antes de llegar a la app.
+	request_body {
+		max_size 10MB
+	}
+
+	# Bloquea sondeos típicos de bots (ellos prueban si existe /.env o /.git)
+	@probe path /.env* /.git* *.php
+	respond @probe 404
+
+	# Todo lo que llega a "mi-app.duckdns.org" se lo paso a tu app en el
+	# puerto 8000 (el nombre "app" es el servicio del docker-compose.yml).
+	reverse_proxy app:8000 {
+		# Estas cabeceras le dicen a tu app la IP real del visitante
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

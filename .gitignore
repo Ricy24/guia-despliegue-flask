@@ -1,0 +1,20 @@
+# Secretos y entornos — NUNCA subir
+.env
+.env.*
+!.env.ejemplo
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Datos locales de la app (viven en el VPS, no en Git)
+data/
+uploads/
+backups/
+
+# Sistema/IDE
+.DS_Store
+.idea/
+.vscode/

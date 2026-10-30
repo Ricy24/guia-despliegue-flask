@@ -1,0 +1,36 @@
+name: ejemplo-guia
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: ejemplo-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./server/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app_net
+
+  app:
+    build: .
+    container_name: ejemplo-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+    networks:
+      - app_net
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app_net:
+    driver: bridge

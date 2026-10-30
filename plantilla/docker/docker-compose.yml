@@ -1,0 +1,73 @@
+# ==============================================================================
+# DOCKER COMPOSE: tu app + Caddy (HTTPS) en un solo comando
+# Este archivo vive en tu proyecto como: docker/docker-compose.yml
+# Guía completa: docs/08-app-flask-en-docker.md
+#
+# Para levantarlo (en el VPS, dentro de la carpeta de la app):
+#   docker compose up -d --build
+# ==============================================================================
+name: mi-app # <-- AJUSTA: el nombre de tu proyecto
+
+services:
+  # El portero: recibe en 80/443 y le pasa a la app. HTTPS automático.
+  caddy:
+    image: caddy:2-alpine
+    container_name: mi-app-caddy # <-- AJUSTA
+    restart: unless-stopped # si el VPS se reinicia, Caddy vuelve solo
+    ports:
+      - "80:80" # HTTP (Caddy lo usa para obtener el certificado y redirigir)
+      - "443:443" # HTTPS
+      - "443:443/udp" # HTTP/3 (versión más rápida de HTTPS)
+    volumes:
+      # Tu configuración de Caddy...
+      - ./server/Caddyfile:/etc/caddy/Caddyfile:ro # ":ro" = solo lectura
+      # ...y los certificados, en volúmenes que sobreviven a los deploys
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app_net
+
+  # Tu app Flask
+  app:
+    build:
+      context: .. # la carpeta raíz de tu proyecto (donde está requirements.txt)
+      dockerfile: docker/Dockerfile # este Dockerfile
+    container_name: mi-app-api # <-- AJUSTA
+    restart: unless-stopped
+    env_file:
+      - ../.env # variables de entorno (secretos) — nunca subir este archivo a Git
+    volumes:
+      # Persistir datos y subidas FUERA del contenedor: si se recrea, no se pierden
+      - ../data:/app/data # <-- si usas SQLite, esta línea guarda tu base de datos
+      - ../uploads:/app/uploads
+    networks:
+      - app_net
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app_net:
+    driver: bridge
+
+# ---------------------------------------------------------------------------
+# ¿Usas MySQL o PostgreSQL en vez de SQLite? Agrega un servicio "db" y
+# descomenta. Es lo mismo que hace PlomApp con su PostgreSQL:
+#
+#   db:
+#     image: postgres:16-alpine          # o mysql:8.4
+#     container_name: mi-app-db
+#     restart: unless-stopped
+#     environment:
+#       POSTGRES_USER: miapp
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}   # sale del .env
+#       POSTGRES_DB: miapp
+#     volumes:
+#       - db_data:/var/lib/postgresql/data
+#     networks:
+#       - app_net
+#
+# y en "app" agrega:  depends_on: [db]
+# y en "volumes" agrega:  db_data:
+# ---------------------------------------------------------------------------
