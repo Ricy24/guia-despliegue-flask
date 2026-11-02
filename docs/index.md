@@ -23,6 +23,8 @@ mindmap
       12 Cloudflare
       13 Checklist
       14 Sin Docker
+    Caso real
+      15 LifeOS
 ```
 
 Al terminar la guía queda la app Flask publicada en
@@ -37,6 +39,9 @@ DuckDNS, GitHub Actions y Vercel.
    a tu proyecto. La tabla de qué archivo va en cada parte está en su LEEME.
 3. Donde aparezca `<TU_IP>` o `mi-app.duckdns.org` se reemplaza por los
    valores propios.
+4. El [capítulo 15](15-caso-real-lifeos.md) no es un paso: es el caso real de
+   un servidor completo (LifeOS), con los valores verdaderos y las capturas
+   pendientes por llenar.
 
 ## Estructura del repo
 

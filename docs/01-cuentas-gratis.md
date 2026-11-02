@@ -26,7 +26,8 @@ crédito**: no la cobra, es solo verificación de identidad. Un cargo temporal
 aparece y se devuelve solo.
 
 La región se elige una sola vez y no se cambia después sin crear otra cuenta.
-Para Colombia sirve São Paulo (`sa-saopaulo-1`) o Ashburn (`us-ashburn-1`).
+Para Colombia sirve Bogotá (`sa-bogota-1`), São Paulo (`sa-saopaulo-1`) o
+Ashburn (`us-ashburn-1`).
 
 La aprobación puede ser inmediata o tardar de 1 a 3 días. Si Oracle pide más
 verificación (selfie o documento), se responde desde el correo que llega y se

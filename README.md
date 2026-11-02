@@ -25,6 +25,8 @@ mindmap
       12 Cloudflare
       13 Checklist
       14 Sin Docker
+    Caso real
+      15 LifeOS
 ```
 
 Guía para desplegar una app Flask en un VPS gratis de Oracle Cloud, con
@@ -68,6 +70,7 @@ Costo: $0/mes. Es la misma arquitectura que usa PlomApp en producción
 | 12 | [Cloudflare (opcional)](docs/12-cloudflare.md) | Worker con rate limiting, IP oculta |
 | 13 | [Checklist de producción](docs/13-checklist-produccion.md) | Secretos, backups, hardening |
 | 14 | [Sin Docker (apéndice)](docs/14-sin-docker.md) | gunicorn + systemd directo |
+| 15 | [Caso real: LifeOS](docs/15-caso-real-lifeos.md) | Infraestructura real completa, paso a paso con capturas |
 | — | [Troubleshooting](docs/troubleshooting.md) | Errores comunes y su arreglo |
 
 ## Estructura

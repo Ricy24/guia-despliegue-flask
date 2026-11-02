@@ -82,8 +82,9 @@ ssh -i ~\.ssh\mi-app-vps.pub ubuntu@<TU_IP>
 
 Pregunta por fingerprint: `yes`. Entra el prompt `ubuntu@guia-vps:~$`.
 
-> En PlomApp quedó una instancia en `sa-saopaulo-1` con Ubuntu 24.04,
-> hostname `lifeos`, y la llave que hoy está en `~\.ssh\lifeos.key`.
+> En LifeOS quedó una instancia en `sa-bogota-1` con Ubuntu 24.04,
+> hostname `lifeos`, shape `VM.Standard3.Flex`, y la llave que hoy está en
+> `~\.ssh\lifeos.key`.
 
 ## Errores comunes
 

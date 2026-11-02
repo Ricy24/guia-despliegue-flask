@@ -47,8 +47,11 @@ se escribe lo que se busca, por ejemplo `Instances` o `VCN`.
 - **Rechazo de la tarjeta**: si el cargo temporal no se devuelve en unos días,
   revisar con el banco si bloqueó el pago por ser extranjero.
 
-> En PlomApp se usó `sa-saopaulo-1` (Brasil), una instancia ARM con Ubuntu
-> 24.04 y disco de 45 GB, corriendo desde septiembre de 2026.
+> En LifeOS se usó `sa-bogota-1` (Bogotá), una instancia `VM.Standard3.Flex`
+> de 1 OCPU y 16 GB con Ubuntu 24.04 y disco de 45 GB, corriendo desde
+> septiembre de 2026. El intento inicial con A1 Flex falló por falta de
+> capacidad; el recorrido completo está en el
+> [capítulo 15](15-caso-real-lifeos.md).
 
 > En la consola, **Governance → Limits, Quotas and Usage** muestra el límite
 > de Compute asignado a la cuenta. Vale la pena revisarlo antes de crear la

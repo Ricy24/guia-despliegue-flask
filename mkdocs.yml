@@ -71,4 +71,5 @@ nav:
       - "12 — Cloudflare": 12-cloudflare.md
       - "13 — Checklist de producción": 13-checklist-produccion.md
       - "14 — Sin Docker": 14-sin-docker.md
+      - "15 — Caso real: LifeOS": 15-caso-real-lifeos.md
       - Troubleshooting: troubleshooting.md
